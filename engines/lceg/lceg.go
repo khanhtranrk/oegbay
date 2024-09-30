@@ -17,13 +17,8 @@ func New() *LCEngine {
 	return &LCEngine{}
 }
 
-func (lc *LCEngine) Get(load string) (*oegbay.Book, error) {
-	ld, err := UnmarshalLoad(load)
-	if err != nil {
-		return nil, err
-	}
-
-	filePath := filepath.Join(ld.Path, oegbay.InfoFile)
+func (lc *LCEngine) getSchema(load *Load) (*oegbay.Schema, error) {
+	filePath := filepath.Join(load.Path, oegbay.InfoFile)
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file at %s: %w", filePath, err)
@@ -35,12 +30,21 @@ func (lc *LCEngine) Get(load string) (*oegbay.Book, error) {
 		return nil, fmt.Errorf("failed to unmarshal YAML data: %w", err)
 	}
 
-	book, err := oegbay.ExtractBookFromSchema(&schema)
+	return &schema, nil
+}
+
+func (lc *LCEngine) Get(load string) (*oegbay.Book, error) {
+	ld, err := UnmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to extract book from schema: %w", err)
+		return nil, err
 	}
 
-	return book, nil
+	schema, err := lc.getSchema(ld)
+	if err != nil {
+		return nil, err
+	}
+
+	return oegbay.ExtractBookFromSchema(schema)
 }
 
 func (lc *LCEngine) Create(load string, book *oegbay.Book) (*oegbay.Book, error) {
@@ -95,16 +99,9 @@ func (lc *LCEngine) Update(load string, book *oegbay.Book) (*oegbay.Book, error)
 		return nil, err
 	}
 
-	filePath := filepath.Join(ld.Path, oegbay.InfoFile)
-	data, err := os.ReadFile(filePath)
+	schema, err := lc.getSchema(ld)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file at %s: %w", filePath, err)
-	}
-
-	var schema oegbay.Schema
-	err = yaml.Unmarshal(data, &schema)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal YAML data: %w", err)
+		return nil, err
 	}
 
 	schema.Name = book.Name
@@ -115,6 +112,7 @@ func (lc *LCEngine) Update(load string, book *oegbay.Book) (*oegbay.Book, error)
 		return nil, fmt.Errorf("failed to marshal YAML schema: %w", err)
 	}
 
+	filePath := filepath.Join(ld.Path, oegbay.InfoFile)
 	err = os.WriteFile(filePath, schemaData, 0755)
 	if err != nil {
 		return nil, fmt.Errorf("failed to write to file at %s: %w", filePath, err)
