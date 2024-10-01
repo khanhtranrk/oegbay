@@ -8,10 +8,9 @@ type Load struct {
 	Path string `json:"path"`
 }
 
-func UnmarshalLoad(load string) (*Load, error) {
+func unmarshalLoad(load string) (*Load, error) {
 	var ld Load
-	err := json.Unmarshal([]byte(load), &ld)
-	if err != nil {
+	if err := json.Unmarshal([]byte(load), &ld); err != nil {
 		return nil, err
 	}
 
