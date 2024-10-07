@@ -1,6 +1,8 @@
 package schema
 
-import "github.com/khanhtranrk/oegbay"
+import (
+	"github.com/khanhtranrk/oegbay/domain"
+)
 
 type PageSchema struct {
 	Signiture       string `yaml:"signiture"`
@@ -13,8 +15,8 @@ type PageSchema struct {
 	UpdatedAt       string `yaml:"updated_at"`
 }
 
-func (ps *PageSchema) Page() *oegbay.Page {
-	return &oegbay.Page{
+func (ps *PageSchema) Page() *domain.Page {
+	return &domain.Page{
 		Signiture:       ps.Signiture,
 		Name:            ps.Name,
 		Description:     ps.Description,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/khanhtranrk/oegbay"
-	"github.com/khanhtranrk/oegbay/engines/lceg"
+	"github.com/khanhtranrk/oegbay/engine/lceg"
 )
 
 func main() {
