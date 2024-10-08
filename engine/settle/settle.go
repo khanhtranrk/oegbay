@@ -10,9 +10,7 @@ type Settle struct {
 		ReadSchema(load *Load) (*schema.BookSchema, error)
 		SaveSchema(load *Load, sch *schema.BookSchema) error
 
-		ReadBook(load *Load) (*domain.Book, error)
 		CreateBook(load *Load, book *domain.Book) error
-		UpdateBook(load *Load, book *domain.Book) error
 		DeleteBook(load *Load) error
 
 		ReadPageContent(load *Load, page *domain.Page) error
