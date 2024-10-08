@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/khanhtranrk/oegbay"
 	"github.com/khanhtranrk/oegbay/domain"
 	"github.com/khanhtranrk/oegbay/setting"
 )
@@ -97,7 +96,7 @@ func (s *BookSchema) CreatePage(page *domain.Page) error {
 	return nil
 }
 
-func (s *BookSchema) UpdatePage(page *oegbay.Page) error {
+func (s *BookSchema) UpdatePage(page *domain.Page) error {
 	now := time.Now()
 	for index, pg := range s.Pages {
 		if pg.Signiture == page.Signiture {
@@ -118,7 +117,7 @@ func (s *BookSchema) UpdatePage(page *oegbay.Page) error {
 func (s *BookSchema) DeletePage(signiture string) error {
 	for index, pg := range s.Pages {
 		if pg.Signiture == signiture {
-			s.Pages = append(s.Pages[:index], s.Pages[index+1:]...)
+			s.Pages[index].DeletedAt = time.Now().String()
 			return nil
 		}
 	}

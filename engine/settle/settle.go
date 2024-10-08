@@ -1,34 +1,40 @@
 package settle
 
 import (
-	"github.com/khanhtranrk/oegbay"
 	"github.com/khanhtranrk/oegbay/domain"
 	"github.com/khanhtranrk/oegbay/schema"
 )
 
 type Settle struct {
 	Process interface {
-		ReadSchema(load string) (*schema.BookSchema, error)
-		SaveSchema(load string, sch *schema.BookSchema) error
+		ReadSchema(load *Load) (*schema.BookSchema, error)
+		SaveSchema(load *Load, sch *schema.BookSchema) error
 
-		ReadBook(load string) (*domain.Book, error)
-		CreateBook(load string, book *domain.Book) error
-		DeleteBook(load string) error
+		ReadBook(load *Load) (*domain.Book, error)
+		CreateBook(load *Load, book *domain.Book) error
+		UpdateBook(load *Load, book *domain.Book) error
+		DeleteBook(load *Load) error
 
-		ReadPageContent(load string) ([]byte, error)
+		ReadPageContent(load *Load, page *domain.Page) error
+		CreatePage(load *Load, page *domain.Page) error
+		UpdatePage(load *Load, page *domain.Page) error
+		DeletePage(load *Load, page *domain.Page) error
 	}
 }
 
-// func New(operation operation.Operation) *Settle {
-// 	return &Settle{
-// 		Process: &Process{
-// 			Operation: operation,
-// 		},
-// 	}
-// }
+func New() *Settle {
+	return &Settle{
+		Process: &Process{},
+	}
+}
 
 func (s *Settle) Get(load string) (*domain.Book, error) {
-	sch, err := s.Process.ReadSchema(load)
+	ld, err := unmarshalLoad(load)
+	if err != nil {
+		return nil, err
+	}
+
+	sch, err := s.Process.ReadSchema(ld)
 	if err != nil {
 		return nil, err
 	}
@@ -37,14 +43,19 @@ func (s *Settle) Get(load string) (*domain.Book, error) {
 }
 
 func (s *Settle) Create(load string, book *domain.Book) error {
-	if err := s.Process.CreateBook(load, book); err != nil {
+	ld, err := unmarshalLoad(load)
+	if err != nil {
+		return err
+	}
+
+	if err := s.Process.CreateBook(ld, book); err != nil {
 		return err
 	}
 
 	sch := schema.NewBookSchema(book)
 
-	if err := s.Process.SaveSchema(load, sch); err != nil {
-		s.Process.DeleteBook(load)
+	if err := s.Process.SaveSchema(ld, sch); err != nil {
+		s.Process.DeleteBook(ld)
 		return err
 	}
 
@@ -52,14 +63,19 @@ func (s *Settle) Create(load string, book *domain.Book) error {
 }
 
 func (s *Settle) Update(load string, book *domain.Book) error {
-	sch, err := s.Process.ReadSchema(load)
+	ld, err := unmarshalLoad(load)
+	if err != nil {
+		return err
+	}
+
+	sch, err := s.Process.ReadSchema(ld)
 	if err != nil {
 		return err
 	}
 
 	sch.Update(book)
 
-	if err := s.Process.SaveSchema(load, sch); err != nil {
+	if err := s.Process.SaveSchema(ld, sch); err != nil {
 		return err
 	}
 
@@ -67,7 +83,12 @@ func (s *Settle) Update(load string, book *domain.Book) error {
 }
 
 func (s *Settle) ListPages(load string) ([]domain.Page, error) {
-	sch, err := s.Process.ReadSchema(load)
+	ld, err := unmarshalLoad(load)
+	if err != nil {
+		return nil, err
+	}
+
+	sch, err := s.Process.ReadSchema(ld)
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +98,13 @@ func (s *Settle) ListPages(load string) ([]domain.Page, error) {
 	return pages, nil
 }
 
-func (s *Settle) GetPage(load string, signiture string) (*oegbay.Page, error) {
-	sch, err := s.Process.ReadSchema(load)
+func (s *Settle) GetPage(load string, signiture string) (*domain.Page, error) {
+	ld, err := unmarshalLoad(load)
+	if err != nil {
+		return nil, err
+	}
+
+	sch, err := s.Process.ReadSchema(ld)
 	if err != nil {
 		return nil, err
 	}
@@ -88,55 +114,47 @@ func (s *Settle) GetPage(load string, signiture string) (*oegbay.Page, error) {
 		return nil, err
 	}
 
-	if err := s.Process.LoadPage(load, page); err != nil {
-		return nil, err
-	}
-
-	// filePath := filepath.Join(ld.Path, signiture, setting.ContentFile)
-	// content, err := os.ReadFile(filePath)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// page.Content = string(content)
-
-	return page, nil
-}
-
-func (s *Settle) CreatePage(load string, page *oegbay.Page) (*oegbay.Page, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
-	}
-
-	sch, err := lc.Operation.GetSchema(ld)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := sch.CreatePage(page); err != nil {
-		return nil, err
-	}
-
-	if err := lc.Operation.CreatePage(ld, page); err != nil {
-		return nil, err
-	}
-
-	if err := lc.Operation.SaveSchema(ld, sch); err != nil {
-		lc.Operation.DeletePage(ld, page.Signiture)
+	if err := s.Process.ReadPageContent(ld, page); err != nil {
 		return nil, err
 	}
 
 	return page, nil
 }
 
-func (s *Settle) UpdatePage(load string, page *oegbay.Page) error {
+func (s *Settle) CreatePage(load string, page *domain.Page) error {
 	ld, err := unmarshalLoad(load)
 	if err != nil {
 		return err
 	}
 
-	sch, err := lc.Operation.GetSchema(ld)
+	sch, err := s.Process.ReadSchema(ld)
+	if err != nil {
+		return err
+	}
+
+	if err := sch.CreatePage(page); err != nil {
+		return err
+	}
+
+	if err := s.Process.CreatePage(ld, page); err != nil {
+		return err
+	}
+
+	if err := s.Process.SaveSchema(ld, sch); err != nil {
+		s.Process.DeletePage(ld, page)
+		return err
+	}
+
+	return nil
+}
+
+func (s *Settle) UpdatePage(load string, page *domain.Page) error {
+	ld, err := unmarshalLoad(load)
+	if err != nil {
+		return err
+	}
+
+	sch, err := s.Process.ReadSchema(ld)
 	if err != nil {
 		return err
 	}
@@ -145,36 +163,13 @@ func (s *Settle) UpdatePage(load string, page *oegbay.Page) error {
 		return err
 	}
 
-	if err := lc.Operation.UpdatePage(ld, page); err != nil {
+	if err := s.Process.UpdatePage(ld, page); err != nil {
 		return err
 	}
 
-	if err := lc.Operation.SaveSchema(ld, sch); err != nil {
+	if err := s.Process.SaveSchema(ld, sch); err != nil {
 		return err
 	}
-
-	// cntFilePath := filepath.Join(ld.Path, page.Signiture, setting.ContentFile)
-	// bakFilePath := filepath.Join(ld.Path, page.Signiture, setting.ContentBackupFile)
-
-	// content, err := os.ReadFile(cntFilePath)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = os.WriteFile(bakFilePath, content, 0755)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = os.WriteFile(cntFilePath, []byte(page.Content), 0755)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if err := lc.saveSchema(ld, sch); err != nil {
-	// 	os.WriteFile(cntFilePath, content, 0755)
-	// 	return err
-	// }
 
 	return nil
 }
@@ -185,7 +180,7 @@ func (s *Settle) DeletePage(load string, signiture string) error {
 		return err
 	}
 
-	sch, err := lc.Operation.GetSchema(ld)
+	sch, err := s.Process.ReadSchema(ld)
 	if err != nil {
 		return err
 	}
@@ -194,25 +189,9 @@ func (s *Settle) DeletePage(load string, signiture string) error {
 		return err
 	}
 
-	if err := lc.Operation.DeletePage(ld, signiture); err != nil {
+	if err := s.Process.SaveSchema(ld, sch); err != nil {
 		return err
 	}
-
-	if err := lc.Operation.SaveSchema(ld, sch); err != nil {
-		return err
-	}
-
-	// pageFolderPath := filepath.Join(ld.Path, signiture)
-	// pageDeletedFolderPath := filepath.Join(ld.Path, signiture+"_deleted")
-	// err = os.Rename(pageFolderPath, pageDeletedFolderPath)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if err := lc.saveSchema(ld, sch); err != nil {
-	// 	os.Rename(pageDeletedFolderPath, pageFolderPath)
-	// 	return err
-	// }
 
 	return nil
 }

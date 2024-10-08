@@ -13,6 +13,7 @@ type PageSchema struct {
 	Content         string `yaml:"content"`
 	CreatedAt       string `yaml:"created_at"`
 	UpdatedAt       string `yaml:"updated_at"`
+	DeletedAt       string `yaml:"deleted_at"`
 }
 
 func (ps *PageSchema) Page() *domain.Page {

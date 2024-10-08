@@ -1,22 +1,34 @@
 package oegbay
 
-import "fmt"
+import (
+	"encoding/json"
+
+	"github.com/khanhtranrk/oegbay/domain"
+)
 
 type Engine interface {
-	Get(load string) (*Book, error)
-	Create(load string, book *Book) (*Book, error)
-	Update(load string, book *Book) (*Book, error)
-	Delete(load string) (*Book, error)
+	Get(load string) (*domain.Book, error)
+	Create(load string, book *domain.Book) error
+	Update(load string, book *domain.Book) error
 
-	ListPages(load string) ([]Page, error)
-	GetPage(load string, signiture string) (*Page, error)
-	CreatePage(load string, parentSigniture string, page *Page) (*Page, error)
-	UpdatePage(load string, signiture string, page *Page) (*Page, error)
-	DeletePage(load string, signiture string) (*Page, error)
+	ListPages(load string) ([]domain.Page, error)
+	GetPage(load string, signiture string) (*domain.Page, error)
+	CreatePage(load string, page *domain.Page) error
+	UpdatePage(load string, page *domain.Page) error
+	DeletePage(load string, signiture string) error
 }
 
 type EngineBay struct {
 	Engines map[string]Engine
+}
+
+func unmarshalLoad(load string) (*domain.Load, error) {
+	var ld domain.Load
+	if err := json.Unmarshal([]byte(load), &ld); err != nil {
+		return nil, err
+	}
+
+	return &ld, nil
 }
 
 func New(engines map[string]Engine) *EngineBay {
@@ -25,82 +37,73 @@ func New(engines map[string]Engine) *EngineBay {
 	}
 }
 
-func (eb *EngineBay) Get(load string) (*Book, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) Get(load string) (*domain.Book, error) {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return nil, err
 	}
 
 	return eb.Engines[ld.EngineType].Get(load)
 }
 
-func (eb *EngineBay) Create(load string, book *Book) (*Book, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) Create(load string, book *domain.Book) error {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return err
 	}
 
 	return eb.Engines[ld.EngineType].Create(load, book)
 }
 
-func (eb *EngineBay) Update(load string, book *Book) (*Book, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) Update(load string, book *domain.Book) error {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return err
 	}
 
 	return eb.Engines[ld.EngineType].Update(load, book)
 }
 
-func (eb *EngineBay) Delete(load string) (*Book, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) ListPages(load string) ([]domain.Page, error) {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
-	}
-
-	return eb.Engines[ld.EngineType].Delete(load)
-}
-
-func (eb *EngineBay) ListPages(load string) ([]Page, error) {
-	ld, err := UnmarshalLoad(load)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return nil, err
 	}
 
 	return eb.Engines[ld.EngineType].ListPages(load)
 }
 
-func (eb *EngineBay) GetPage(load string, signiture string) (*Page, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) GetPage(load string, signiture string) (*domain.Page, error) {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return nil, err
 	}
 
 	return eb.Engines[ld.EngineType].GetPage(load, signiture)
 }
 
-func (eb *EngineBay) CreatePage(load string, parentSigniture string, page *Page) (*Page, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) CreatePage(load string, parentSigniture string, page *domain.Page) error {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return err
 	}
 
-	return eb.Engines[ld.EngineType].CreatePage(load, parentSigniture, page)
+	return eb.Engines[ld.EngineType].CreatePage(load, page)
 }
 
-func (eb *EngineBay) UpdatePage(load string, parentSigniture string, page *Page) (*Page, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) UpdatePage(load string, parentSigniture string, page *domain.Page) error {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return err
 	}
 
-	return eb.Engines[ld.EngineType].UpdatePage(load, parentSigniture, page)
+	return eb.Engines[ld.EngineType].UpdatePage(load, page)
 }
 
-func (eb *EngineBay) DeletePage(load string, signiture string) (*Page, error) {
-	ld, err := UnmarshalLoad(load)
+func (eb *EngineBay) DeletePage(load string, signiture string) error {
+	ld, err := unmarshalLoad(load)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal load: %v", err)
+		return err
 	}
 
 	return eb.Engines[ld.EngineType].DeletePage(load, signiture)
