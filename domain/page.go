@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type Page struct {
 	Signiture       string
 	Name            string
@@ -7,6 +9,6 @@ type Page struct {
 	Theme           string
 	Content         string
 	ParentSigniture string
-	CreatedAt       string
-	UpdatedAt       string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

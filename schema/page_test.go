@@ -2,36 +2,32 @@ package schema
 
 import (
 	"testing"
+	"time"
 
-	"github.com/khanhtranrk/oegbay/domain"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPageSchema_Page(t *testing.T) {
+	now := time.Now()
 	ps := &PageSchema{
 		Signiture:       "test-signiture",
-		ParentSigniture: "test-parent-signiture",
-		Name:            "test-name",
-		Description:     "test-description",
-		Theme:           "test-theme",
-		Content:         "test-content",
-		CreatedAt:       "2023-01-01T00:00:00Z",
-		UpdatedAt:       "2023-01-02T00:00:00Z",
-		DeletedAt:       "2023-01-03T00:00:00Z",
+		ParentSigniture: "parent-signiture",
+		Name:            "Test Page",
+		Description:     "This is a test page",
+		Theme:           "default",
+		Content:         "Test content",
+		CreatedAt:       now,
+		UpdatedAt:       now,
 	}
 
 	page := ps.Page()
 
-	expectedPage := &domain.Page{
-		Signiture:       "test-signiture",
-		ParentSigniture: "test-parent-signiture",
-		Name:            "test-name",
-		Description:     "test-description",
-		Theme:           "test-theme",
-		Content:         "test-content",
-		CreatedAt:       "2023-01-01T00:00:00Z",
-		UpdatedAt:       "2023-01-02T00:00:00Z",
-	}
-
-	assert.Equal(t, expectedPage, page)
+	assert.Equal(t, ps.Signiture, page.Signiture)
+	assert.Equal(t, ps.ParentSigniture, page.ParentSigniture)
+	assert.Equal(t, ps.Name, page.Name)
+	assert.Equal(t, ps.Description, page.Description)
+	assert.Equal(t, ps.Theme, page.Theme)
+	assert.Equal(t, ps.Content, page.Content)
+	assert.Equal(t, ps.CreatedAt, page.CreatedAt)
+	assert.Equal(t, ps.UpdatedAt, page.UpdatedAt)
 }

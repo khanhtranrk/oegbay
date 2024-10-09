@@ -13,8 +13,8 @@ type BookSchema struct {
 	Version     string       `yaml:"version"`
 	Name        string       `yaml:"name"`
 	Description string       `yaml:"description"`
-	CreatedAt   string       `yaml:"created_at"`
-	UpdatedAt   string       `yaml:"updated_at"`
+	CreatedAt   time.Time    `yaml:"created_at"`
+	UpdatedAt   time.Time    `yaml:"updated_at"`
 	Pages       []PageSchema `yaml:"pages"`
 }
 
@@ -25,12 +25,12 @@ func NewBookSchema(s *domain.Book) *BookSchema {
 		Version:     setting.DefaultVersion,
 		Name:        s.Name,
 		Description: s.Description,
-		CreatedAt:   now.String(),
-		UpdatedAt:   now.String(),
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 
-	s.CreatedAt = now.String()
-	s.UpdatedAt = now.String()
+	s.CreatedAt = now
+	s.UpdatedAt = now
 
 	return sch
 }
@@ -48,8 +48,8 @@ func (s *BookSchema) Update(book *domain.Book) {
 	now := time.Now()
 	s.Name = book.Name
 	s.Description = book.Description
-	s.UpdatedAt = now.String()
-	book.UpdatedAt = now.String()
+	s.UpdatedAt = now
+	book.UpdatedAt = now
 }
 
 func (s *BookSchema) ListPages() []domain.Page {
@@ -85,13 +85,13 @@ func (s *BookSchema) CreatePage(page *domain.Page) error {
 		Description:     page.Description,
 		Theme:           page.Theme,
 		Content:         page.Content,
-		CreatedAt:       now.String(),
-		UpdatedAt:       now.String(),
+		CreatedAt:       now,
+		UpdatedAt:       now,
 	})
 
 	page.Signiture = signature
-	page.CreatedAt = now.String()
-	page.UpdatedAt = now.String()
+	page.CreatedAt = now
+	page.UpdatedAt = now
 
 	return nil
 }
@@ -103,9 +103,9 @@ func (s *BookSchema) UpdatePage(page *domain.Page) error {
 			s.Pages[index].Name = page.Name
 			s.Pages[index].Description = page.Description
 			s.Pages[index].Theme = page.Theme
-			s.Pages[index].UpdatedAt = now.String()
+			s.Pages[index].UpdatedAt = now
 
-			page.UpdatedAt = now.String()
+			page.UpdatedAt = now
 
 			return nil
 		}
@@ -117,7 +117,7 @@ func (s *BookSchema) UpdatePage(page *domain.Page) error {
 func (s *BookSchema) DeletePage(signiture string) error {
 	for index, pg := range s.Pages {
 		if pg.Signiture == signiture {
-			s.Pages[index].DeletedAt = time.Now().String()
+			s.Pages[index].DeletedAt = time.Now()
 			return nil
 		}
 	}
