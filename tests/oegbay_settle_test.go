@@ -26,8 +26,8 @@ func cleanContext() error {
 func TestCreate(t *testing.T) {
 	cleanContext()
 
-	engines := map[string]oegbay.Engine{
-		"SETTLE": settle.New(),
+	engines := []oegbay.Engine{
+		settle.New(),
 	}
 
 	engineBay := oegbay.New(engines)
@@ -37,14 +37,17 @@ func TestCreate(t *testing.T) {
 		Description: "Test Description",
 	}
 
-	load := &oegbay.Load{
-		EngineType: "SETTLE",
-		EngineLoad: &settle.Load{
+	load := engineBay.NewLoad(
+		&settle.Load{
 			Path: dir,
 		},
-	}
+	)
 
-	if err := engineBay.Create(load, &document); err != nil {
+	_load, _ := engineBay.MarshalLoad(load)
+
+	__load, _ := engineBay.UnmarshalLoad(_load)
+
+	if err := engineBay.Create(__load, &document); err != nil {
 		assert.Fail(t, err.Error())
 		return
 
