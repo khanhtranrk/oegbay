@@ -1,6 +1,11 @@
 package oegbay
 
 import (
+	"encoding/json"
+	"path"
+	"reflect"
+	"strings"
+
 	"github.com/khanhtranrk/oegbay/domain"
 )
 
@@ -9,6 +14,8 @@ type Document = domain.Document
 type Page = domain.Page
 
 type Engine interface {
+	UnmarshalLoad(loadData interface{}) (interface{}, error)
+
 	Get(load interface{}) (*Document, error)
 	Create(load interface{}, document *Document) error
 	Update(load interface{}, document *Document) error
@@ -24,10 +31,51 @@ type EngineBay struct {
 	Engines map[string]Engine
 }
 
-func New(engines map[string]Engine) *EngineBay {
-	return &EngineBay{
-		Engines: engines,
+func New(engines []Engine) *EngineBay {
+	_engines := make(map[string]Engine)
+
+	for _, engine := range engines {
+		engineType := reflect.TypeOf(engine)
+		if engineType.Kind() == reflect.Ptr {
+			engineType = engineType.Elem()
+		}
+		_engines[strings.ToLower(engineType.Name())] = engine
 	}
+
+	return &EngineBay{
+		Engines: _engines,
+	}
+}
+
+func (eb *EngineBay) NewLoad(loadData interface{}) *Load {
+	engineType := reflect.TypeOf(loadData)
+	if engineType.Kind() == reflect.Ptr {
+		engineType = engineType.Elem()
+	}
+	return &Load{
+		EngineType: strings.ToLower(path.Base(engineType.PkgPath())),
+		EngineLoad: loadData,
+	}
+}
+
+func (eb *EngineBay) MarshalLoad(load *Load) ([]byte, error) {
+	return json.Marshal(load)
+}
+
+func (eb *EngineBay) UnmarshalLoad(loadData []byte) (*Load, error) {
+	var ld Load
+	if err := json.Unmarshal(loadData, &ld); err != nil {
+		return nil, nil
+	}
+
+	engineLoad, err := eb.Engines[ld.EngineType].UnmarshalLoad(ld.EngineLoad)
+	if err != nil {
+		return nil, err
+	}
+
+	ld.EngineLoad = engineLoad
+
+	return &ld, nil
 }
 
 func (eb *EngineBay) Get(load *Load) (*Document, error) {

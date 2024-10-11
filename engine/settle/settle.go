@@ -1,6 +1,7 @@
 package settle
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/khanhtranrk/oegbay/domain"
@@ -26,6 +27,27 @@ func New() *Settle {
 	return &Settle{
 		Process: &Process{},
 	}
+}
+
+func (s *Settle) UnmarshalLoad(loadData interface{}) (interface{}, error) {
+	mappedData, ok := loadData.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("data is not of type map[string]interface{}")
+	}
+
+	jsonData, err := json.Marshal(mappedData)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling to JSON: %v", err)
+	}
+
+	var load Load
+
+	err = json.Unmarshal(jsonData, &load)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling JSON: %v", err)
+	}
+
+	return &load, nil
 }
 
 func (s *Settle) Get(load interface{}) (*domain.Document, error) {
