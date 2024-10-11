@@ -1,17 +1,19 @@
 package settle
 
 import (
+	"fmt"
+
 	"github.com/khanhtranrk/oegbay/domain"
 	"github.com/khanhtranrk/oegbay/schema"
 )
 
 type Settle struct {
 	Process interface {
-		ReadSchema(load *Load) (*schema.BookSchema, error)
-		SaveSchema(load *Load, sch *schema.BookSchema) error
+		ReadSchema(load *Load) (*schema.DocumentSchema, error)
+		SaveSchema(load *Load, sch *schema.DocumentSchema) error
 
-		CreateBook(load *Load, book *domain.Book) error
-		DeleteBook(load *Load) error
+		CreateDocument(load *Load, document *domain.Document) error
+		DeleteDocument(load *Load) error
 
 		ReadPageContent(load *Load, page *domain.Page) error
 		CreatePage(load *Load, page *domain.Page) error
@@ -26,10 +28,10 @@ func New() *Settle {
 	}
 }
 
-func (s *Settle) Get(load string) (*domain.Book, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
+func (s *Settle) Get(load interface{}) (*domain.Document, error) {
+	ld, ok := load.(*Load)
+	if !ok {
+		return nil, fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)
@@ -37,33 +39,33 @@ func (s *Settle) Get(load string) (*domain.Book, error) {
 		return nil, err
 	}
 
-	return sch.Book(), nil
+	return sch.Document(), nil
 }
 
-func (s *Settle) Create(load string, book *domain.Book) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
+func (s *Settle) Create(load interface{}, document *domain.Document) error {
+	ld, ok := load.(*Load)
+	if !ok {
+		return fmt.Errorf("expected type *Load, got %T", load)
+	}
+
+	if err := s.Process.CreateDocument(ld, document); err != nil {
 		return err
 	}
 
-	if err := s.Process.CreateBook(ld, book); err != nil {
-		return err
-	}
-
-	sch := schema.NewBookSchema(book)
+	sch := schema.NewDocumentSchema(document)
 
 	if err := s.Process.SaveSchema(ld, sch); err != nil {
-		s.Process.DeleteBook(ld)
+		s.Process.DeleteDocument(ld)
 		return err
 	}
 
 	return nil
 }
 
-func (s *Settle) Update(load string, book *domain.Book) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
+func (s *Settle) Update(load interface{}, document *domain.Document) error {
+	ld, ok := load.(*Load)
+	if !ok {
+		return fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)
@@ -71,7 +73,7 @@ func (s *Settle) Update(load string, book *domain.Book) error {
 		return err
 	}
 
-	sch.Update(book)
+	sch.Update(document)
 
 	if err := s.Process.SaveSchema(ld, sch); err != nil {
 		return err
@@ -80,10 +82,10 @@ func (s *Settle) Update(load string, book *domain.Book) error {
 	return nil
 }
 
-func (s *Settle) ListPages(load string) ([]domain.Page, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
+func (s *Settle) ListPages(load interface{}) ([]domain.Page, error) {
+	ld, ok := load.(*Load)
+	if !ok {
+		return nil, fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)
@@ -96,10 +98,10 @@ func (s *Settle) ListPages(load string) ([]domain.Page, error) {
 	return pages, nil
 }
 
-func (s *Settle) GetPage(load string, signiture string) (*domain.Page, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
+func (s *Settle) GetPage(load interface{}, signiture string) (*domain.Page, error) {
+	ld, ok := load.(*Load)
+	if !ok {
+		return nil, fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)
@@ -119,10 +121,10 @@ func (s *Settle) GetPage(load string, signiture string) (*domain.Page, error) {
 	return page, nil
 }
 
-func (s *Settle) CreatePage(load string, page *domain.Page) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
+func (s *Settle) CreatePage(load interface{}, page *domain.Page) error {
+	ld, ok := load.(*Load)
+	if !ok {
+		return fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)
@@ -146,10 +148,10 @@ func (s *Settle) CreatePage(load string, page *domain.Page) error {
 	return nil
 }
 
-func (s *Settle) UpdatePage(load string, page *domain.Page) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
+func (s *Settle) UpdatePage(load interface{}, page *domain.Page) error {
+	ld, ok := load.(*Load)
+	if !ok {
+		return fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)
@@ -172,10 +174,10 @@ func (s *Settle) UpdatePage(load string, page *domain.Page) error {
 	return nil
 }
 
-func (s *Settle) DeletePage(load string, signiture string) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
+func (s *Settle) DeletePage(load interface{}, signiture string) error {
+	ld, ok := load.(*Load)
+	if !ok {
+		return fmt.Errorf("expected type *Load, got %T", load)
 	}
 
 	sch, err := s.Process.ReadSchema(ld)

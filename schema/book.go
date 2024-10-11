@@ -9,7 +9,7 @@ import (
 	"github.com/khanhtranrk/oegbay/setting"
 )
 
-type BookSchema struct {
+type DocumentSchema struct {
 	Version     string       `yaml:"version"`
 	Name        string       `yaml:"name"`
 	Description string       `yaml:"description"`
@@ -18,10 +18,10 @@ type BookSchema struct {
 	Pages       []PageSchema `yaml:"pages"`
 }
 
-func NewBookSchema(s *domain.Book) *BookSchema {
+func NewDocumentSchema(s *domain.Document) *DocumentSchema {
 	now := time.Now()
 
-	sch := &BookSchema{
+	sch := &DocumentSchema{
 		Version:     setting.DefaultVersion,
 		Name:        s.Name,
 		Description: s.Description,
@@ -35,8 +35,8 @@ func NewBookSchema(s *domain.Book) *BookSchema {
 	return sch
 }
 
-func (s *BookSchema) Book() *domain.Book {
-	return &domain.Book{
+func (s *DocumentSchema) Document() *domain.Document {
+	return &domain.Document{
 		Name:        s.Name,
 		Description: s.Description,
 		CreatedAt:   s.CreatedAt,
@@ -44,15 +44,15 @@ func (s *BookSchema) Book() *domain.Book {
 	}
 }
 
-func (s *BookSchema) Update(book *domain.Book) {
+func (s *DocumentSchema) Update(document *domain.Document) {
 	now := time.Now()
-	s.Name = book.Name
-	s.Description = book.Description
+	s.Name = document.Name
+	s.Description = document.Description
 	s.UpdatedAt = now
-	book.UpdatedAt = now
+	document.UpdatedAt = now
 }
 
-func (s *BookSchema) ListPages() []domain.Page {
+func (s *DocumentSchema) ListPages() []domain.Page {
 	var pages []domain.Page
 
 	for _, pgs := range s.Pages {
@@ -62,7 +62,7 @@ func (s *BookSchema) ListPages() []domain.Page {
 	return pages
 }
 
-func (s *BookSchema) GetPage(signiture string) (*domain.Page, error) {
+func (s *DocumentSchema) GetPage(signiture string) (*domain.Page, error) {
 	for _, pgs := range s.Pages {
 		if pgs.Signiture == signiture {
 			return pgs.Page(), nil
@@ -72,7 +72,7 @@ func (s *BookSchema) GetPage(signiture string) (*domain.Page, error) {
 	return nil, fmt.Errorf("page with signature %s not found", signiture)
 }
 
-func (s *BookSchema) CreatePage(page *domain.Page) error {
+func (s *DocumentSchema) CreatePage(page *domain.Page) error {
 	now := time.Now()
 	u := uuid.New().String()
 	timestamp := now.Unix()
@@ -96,7 +96,7 @@ func (s *BookSchema) CreatePage(page *domain.Page) error {
 	return nil
 }
 
-func (s *BookSchema) UpdatePage(page *domain.Page) error {
+func (s *DocumentSchema) UpdatePage(page *domain.Page) error {
 	now := time.Now()
 	for index, pg := range s.Pages {
 		if pg.Signiture == page.Signiture {
@@ -114,7 +114,7 @@ func (s *BookSchema) UpdatePage(page *domain.Page) error {
 	return fmt.Errorf("page with signature %s not found", page.Signiture)
 }
 
-func (s *BookSchema) DeletePage(signiture string) error {
+func (s *DocumentSchema) DeletePage(signiture string) error {
 	for index, pg := range s.Pages {
 		if pg.Signiture == signiture {
 			s.Pages[index].DeletedAt = time.Now()

@@ -11,59 +11,59 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBookSchema(t *testing.T) {
-	book := &domain.Book{
-		Name:        "Test Book",
+func TestNewDocumentSchema(t *testing.T) {
+	document := &domain.Document{
+		Name:        "Test Document",
 		Description: "Test Description",
 	}
 
-	bookSchema := schema.NewBookSchema(book)
+	documentSchema := schema.NewDocumentSchema(document)
 
-	assert.Equal(t, setting.DefaultVersion, bookSchema.Version)
-	assert.Equal(t, "Test Book", bookSchema.Name)
-	assert.Equal(t, "Test Description", bookSchema.Description)
-	assert.WithinDuration(t, time.Now(), bookSchema.CreatedAt, time.Second)
-	assert.WithinDuration(t, time.Now(), bookSchema.UpdatedAt, time.Second)
+	assert.Equal(t, setting.DefaultVersion, documentSchema.Version)
+	assert.Equal(t, "Test Document", documentSchema.Name)
+	assert.Equal(t, "Test Description", documentSchema.Description)
+	assert.WithinDuration(t, time.Now(), documentSchema.CreatedAt, time.Second)
+	assert.WithinDuration(t, time.Now(), documentSchema.UpdatedAt, time.Second)
 }
 
-func TestBookSchema_Book(t *testing.T) {
-	bookSchema := &schema.BookSchema{
-		Name:        "Test Book",
+func TestDocumentSchema_Document(t *testing.T) {
+	documentSchema := &schema.DocumentSchema{
+		Name:        "Test Document",
 		Description: "Test Description",
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
 
-	book := bookSchema.Book()
+	document := documentSchema.Document()
 
-	assert.Equal(t, "Test Book", book.Name)
-	assert.Equal(t, "Test Description", book.Description)
-	assert.Equal(t, bookSchema.CreatedAt, book.CreatedAt)
-	assert.Equal(t, bookSchema.UpdatedAt, book.UpdatedAt)
+	assert.Equal(t, "Test Document", document.Name)
+	assert.Equal(t, "Test Description", document.Description)
+	assert.Equal(t, documentSchema.CreatedAt, document.CreatedAt)
+	assert.Equal(t, documentSchema.UpdatedAt, document.UpdatedAt)
 }
 
-func TestBookSchema_Update(t *testing.T) {
-	bookSchema := &schema.BookSchema{
+func TestDocumentSchema_Update(t *testing.T) {
+	documentSchema := &schema.DocumentSchema{
 		Name:        "Old Name",
 		Description: "Old Description",
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
 
-	book := &domain.Book{
+	document := &domain.Document{
 		Name:        "New Name",
 		Description: "New Description",
 	}
 
-	bookSchema.Update(book)
+	documentSchema.Update(document)
 
-	assert.Equal(t, "New Name", bookSchema.Name)
-	assert.Equal(t, "New Description", bookSchema.Description)
-	assert.WithinDuration(t, time.Now(), bookSchema.UpdatedAt, time.Second)
-	assert.WithinDuration(t, time.Now(), book.UpdatedAt, time.Second)
+	assert.Equal(t, "New Name", documentSchema.Name)
+	assert.Equal(t, "New Description", documentSchema.Description)
+	assert.WithinDuration(t, time.Now(), documentSchema.UpdatedAt, time.Second)
+	assert.WithinDuration(t, time.Now(), document.UpdatedAt, time.Second)
 }
 
-func TestBookSchema_ListPages(t *testing.T) {
+func TestDocumentSchema_ListPages(t *testing.T) {
 	page := schema.PageSchema{
 		Signiture:   uuid.New().String(),
 		Name:        "Test Page",
@@ -72,18 +72,18 @@ func TestBookSchema_ListPages(t *testing.T) {
 		UpdatedAt:   time.Now(),
 	}
 
-	bookSchema := &schema.BookSchema{
+	documentSchema := &schema.DocumentSchema{
 		Pages: []schema.PageSchema{page},
 	}
 
-	pages := bookSchema.ListPages()
+	pages := documentSchema.ListPages()
 
 	assert.Len(t, pages, 1)
 	assert.Equal(t, "Test Page", pages[0].Name)
 	assert.Equal(t, "Test Description", pages[0].Description)
 }
 
-func TestBookSchema_GetPage(t *testing.T) {
+func TestDocumentSchema_GetPage(t *testing.T) {
 	signature := uuid.New().String()
 	page := schema.PageSchema{
 		Signiture:   signature,
@@ -93,37 +93,37 @@ func TestBookSchema_GetPage(t *testing.T) {
 		UpdatedAt:   time.Now(),
 	}
 
-	bookSchema := &schema.BookSchema{
+	documentSchema := &schema.DocumentSchema{
 		Pages: []schema.PageSchema{page},
 	}
 
-	foundPage, err := bookSchema.GetPage(signature)
+	foundPage, err := documentSchema.GetPage(signature)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "Test Page", foundPage.Name)
 	assert.Equal(t, "Test Description", foundPage.Description)
 }
 
-func TestBookSchema_CreatePage(t *testing.T) {
-	bookSchema := &schema.BookSchema{}
+func TestDocumentSchema_CreatePage(t *testing.T) {
+	documentSchema := &schema.DocumentSchema{}
 
 	page := &domain.Page{
 		Name:        "New Page",
 		Description: "New Description",
 	}
 
-	err := bookSchema.CreatePage(page)
+	err := documentSchema.CreatePage(page)
 
 	assert.NoError(t, err)
-	assert.Len(t, bookSchema.Pages, 1)
-	assert.Equal(t, "New Page", bookSchema.Pages[0].Name)
-	assert.Equal(t, "New Description", bookSchema.Pages[0].Description)
-	assert.NotEmpty(t, bookSchema.Pages[0].Signiture)
-	assert.WithinDuration(t, time.Now(), bookSchema.Pages[0].CreatedAt, time.Second)
-	assert.WithinDuration(t, time.Now(), bookSchema.Pages[0].UpdatedAt, time.Second)
+	assert.Len(t, documentSchema.Pages, 1)
+	assert.Equal(t, "New Page", documentSchema.Pages[0].Name)
+	assert.Equal(t, "New Description", documentSchema.Pages[0].Description)
+	assert.NotEmpty(t, documentSchema.Pages[0].Signiture)
+	assert.WithinDuration(t, time.Now(), documentSchema.Pages[0].CreatedAt, time.Second)
+	assert.WithinDuration(t, time.Now(), documentSchema.Pages[0].UpdatedAt, time.Second)
 }
 
-func TestBookSchema_UpdatePage(t *testing.T) {
+func TestDocumentSchema_UpdatePage(t *testing.T) {
 	signature := uuid.New().String()
 	page := schema.PageSchema{
 		Signiture:   signature,
@@ -133,7 +133,7 @@ func TestBookSchema_UpdatePage(t *testing.T) {
 		UpdatedAt:   time.Now(),
 	}
 
-	bookSchema := &schema.BookSchema{
+	documentSchema := &schema.DocumentSchema{
 		Pages: []schema.PageSchema{page},
 	}
 
@@ -143,15 +143,15 @@ func TestBookSchema_UpdatePage(t *testing.T) {
 		Description: "Updated Description",
 	}
 
-	err := bookSchema.UpdatePage(updatedPage)
+	err := documentSchema.UpdatePage(updatedPage)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "Updated Page", bookSchema.Pages[0].Name)
-	assert.Equal(t, "Updated Description", bookSchema.Pages[0].Description)
-	assert.WithinDuration(t, time.Now(), bookSchema.Pages[0].UpdatedAt, time.Second)
+	assert.Equal(t, "Updated Page", documentSchema.Pages[0].Name)
+	assert.Equal(t, "Updated Description", documentSchema.Pages[0].Description)
+	assert.WithinDuration(t, time.Now(), documentSchema.Pages[0].UpdatedAt, time.Second)
 }
 
-func TestBookSchema_DeletePage(t *testing.T) {
+func TestDocumentSchema_DeletePage(t *testing.T) {
 	signature := uuid.New().String()
 	page := schema.PageSchema{
 		Signiture:   signature,
@@ -161,12 +161,12 @@ func TestBookSchema_DeletePage(t *testing.T) {
 		UpdatedAt:   time.Now(),
 	}
 
-	bookSchema := &schema.BookSchema{
+	documentSchema := &schema.DocumentSchema{
 		Pages: []schema.PageSchema{page},
 	}
 
-	err := bookSchema.DeletePage(signature)
+	err := documentSchema.DeletePage(signature)
 
 	assert.NoError(t, err)
-	assert.WithinDuration(t, time.Now(), bookSchema.Pages[0].DeletedAt, time.Second)
+	assert.WithinDuration(t, time.Now(), documentSchema.Pages[0].DeletedAt, time.Second)
 }

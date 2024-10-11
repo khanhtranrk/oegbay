@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type Book struct {
+type Document struct {
 	Name        string
 	Description string
 	CreatedAt   time.Time
