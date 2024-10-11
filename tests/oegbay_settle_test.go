@@ -1,19 +1,17 @@
 package oegbay_settle_test
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/khanhtranrk/oegbay"
-	"github.com/khanhtranrk/oegbay/domain"
 	"github.com/khanhtranrk/oegbay/engine/settle"
 	"github.com/khanhtranrk/oegbay/setting"
 	"github.com/stretchr/testify/assert"
 )
 
-const dir = "./book_test"
+const dir = "./document_test"
 
 func cleanContext() error {
 	if _, err := os.Stat(dir); err == nil {
@@ -34,14 +32,19 @@ func TestCreate(t *testing.T) {
 
 	engineBay := oegbay.New(engines)
 
-	load := fmt.Sprintf(`{"engine_type":"SETTLE","path":"%s"}`, dir)
-
-	book := domain.Book{
-		Name:        "Test Book",
+	document := oegbay.Document{
+		Name:        "Test Document",
 		Description: "Test Description",
 	}
 
-	if err := engineBay.Create(load, &book); err != nil {
+	load := &oegbay.Load{
+		EngineType: "SETTLE",
+		EngineLoad: &settle.Load{
+			Path: dir,
+		},
+	}
+
+	if err := engineBay.Create(load, &document); err != nil {
 		assert.Fail(t, err.Error())
 		return
 
@@ -52,10 +55,10 @@ func TestCreate(t *testing.T) {
 	assert.FileExists(t, filepath.Join(dir, setting.SchemaFile))
 
 	// soft
-	assert.Equal(t, "Test Book", book.Name)
-	assert.Equal(t, "Test Description", book.Description)
-	assert.NotNil(t, book.CreatedAt)
-	assert.NotNil(t, book.UpdatedAt)
+	assert.Equal(t, "Test Document", document.Name)
+	assert.Equal(t, "Test Description", document.Description)
+	assert.NotNil(t, document.CreatedAt)
+	assert.NotNil(t, document.UpdatedAt)
 
 	cleanContext()
 }

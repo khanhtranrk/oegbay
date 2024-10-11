@@ -1,34 +1,27 @@
 package oegbay
 
 import (
-	"encoding/json"
-
 	"github.com/khanhtranrk/oegbay/domain"
 )
 
-type Engine interface {
-	Get(load string) (*domain.Book, error)
-	Create(load string, book *domain.Book) error
-	Update(load string, book *domain.Book) error
+type Load = domain.Load
+type Document = domain.Document
+type Page = domain.Page
 
-	ListPages(load string) ([]domain.Page, error)
-	GetPage(load string, signiture string) (*domain.Page, error)
-	CreatePage(load string, page *domain.Page) error
-	UpdatePage(load string, page *domain.Page) error
-	DeletePage(load string, signiture string) error
+type Engine interface {
+	Get(load interface{}) (*Document, error)
+	Create(load interface{}, document *Document) error
+	Update(load interface{}, document *Document) error
+
+	ListPages(load interface{}) ([]domain.Page, error)
+	GetPage(load interface{}, signiture string) (*Page, error)
+	CreatePage(load interface{}, page *Page) error
+	UpdatePage(load interface{}, page *Page) error
+	DeletePage(load interface{}, signiture string) error
 }
 
 type EngineBay struct {
 	Engines map[string]Engine
-}
-
-func unmarshalLoad(load string) (*domain.Load, error) {
-	var ld domain.Load
-	if err := json.Unmarshal([]byte(load), &ld); err != nil {
-		return nil, err
-	}
-
-	return &ld, nil
 }
 
 func New(engines map[string]Engine) *EngineBay {
@@ -37,74 +30,34 @@ func New(engines map[string]Engine) *EngineBay {
 	}
 }
 
-func (eb *EngineBay) Get(load string) (*domain.Book, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
-	}
-
-	return eb.Engines[ld.EngineType].Get(load)
+func (eb *EngineBay) Get(load *Load) (*Document, error) {
+	return eb.Engines[load.EngineType].Get(load.EngineLoad)
 }
 
-func (eb *EngineBay) Create(load string, book *domain.Book) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
-	}
-
-	return eb.Engines[ld.EngineType].Create(load, book)
+func (eb *EngineBay) Create(load *Load, document *Document) error {
+	return eb.Engines[load.EngineType].Create(load.EngineLoad, document)
 }
 
-func (eb *EngineBay) Update(load string, book *domain.Book) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
-	}
-
-	return eb.Engines[ld.EngineType].Update(load, book)
+func (eb *EngineBay) Update(load *Load, document *Document) error {
+	return eb.Engines[load.EngineType].Update(load.EngineLoad, document)
 }
 
-func (eb *EngineBay) ListPages(load string) ([]domain.Page, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
-	}
-
-	return eb.Engines[ld.EngineType].ListPages(load)
+func (eb *EngineBay) ListPages(load *Load) ([]domain.Page, error) {
+	return eb.Engines[load.EngineType].ListPages(load.EngineLoad)
 }
 
-func (eb *EngineBay) GetPage(load string, signiture string) (*domain.Page, error) {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return nil, err
-	}
-
-	return eb.Engines[ld.EngineType].GetPage(load, signiture)
+func (eb *EngineBay) GetPage(load *Load, signiture string) (*Page, error) {
+	return eb.Engines[load.EngineType].GetPage(load.EngineLoad, signiture)
 }
 
-func (eb *EngineBay) CreatePage(load string, parentSigniture string, page *domain.Page) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
-	}
-
-	return eb.Engines[ld.EngineType].CreatePage(load, page)
+func (eb *EngineBay) CreatePage(load *Load, parentSigniture string, page *Page) error {
+	return eb.Engines[load.EngineType].CreatePage(load.EngineLoad, page)
 }
 
-func (eb *EngineBay) UpdatePage(load string, parentSigniture string, page *domain.Page) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
-	}
-
-	return eb.Engines[ld.EngineType].UpdatePage(load, page)
+func (eb *EngineBay) UpdatePage(load *Load, parentSigniture string, page *Page) error {
+	return eb.Engines[load.EngineType].UpdatePage(load.EngineLoad, page)
 }
 
-func (eb *EngineBay) DeletePage(load string, signiture string) error {
-	ld, err := unmarshalLoad(load)
-	if err != nil {
-		return err
-	}
-
-	return eb.Engines[ld.EngineType].DeletePage(load, signiture)
+func (eb *EngineBay) DeletePage(load *Load, signiture string) error {
+	return eb.Engines[load.EngineType].DeletePage(load.EngineLoad, signiture)
 }

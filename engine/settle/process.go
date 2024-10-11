@@ -13,13 +13,13 @@ import (
 type Process struct {
 }
 
-func (p *Process) ReadSchema(load *Load) (*schema.BookSchema, error) {
+func (p *Process) ReadSchema(load *Load) (*schema.DocumentSchema, error) {
 	data, err := os.ReadFile(filepath.Join(load.Path, setting.SchemaFile))
 	if err != nil {
 		return nil, err
 	}
 
-	var sch schema.BookSchema
+	var sch schema.DocumentSchema
 	if err := yaml.Unmarshal(data, &sch); err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (p *Process) ReadSchema(load *Load) (*schema.BookSchema, error) {
 	return &sch, nil
 }
 
-func (p *Process) SaveSchema(load *Load, sch *schema.BookSchema) error {
+func (p *Process) SaveSchema(load *Load, sch *schema.DocumentSchema) error {
 	data, err := yaml.Marshal(sch)
 	if err != nil {
 		return err
@@ -36,11 +36,11 @@ func (p *Process) SaveSchema(load *Load, sch *schema.BookSchema) error {
 	return os.WriteFile(filepath.Join(load.Path, setting.SchemaFile), data, 0755)
 }
 
-func (p *Process) CreateBook(load *Load, book *domain.Book) error {
+func (p *Process) CreateDocument(load *Load, document *domain.Document) error {
 	return os.MkdirAll(load.Path, 0755)
 }
 
-func (p *Process) DeleteBook(load *Load) error {
+func (p *Process) DeleteDocument(load *Load) error {
 	return os.RemoveAll(load.Path)
 }
 
