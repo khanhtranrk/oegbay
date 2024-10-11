@@ -58,6 +58,13 @@ func (eb *EngineBay) NewLoad(loadData interface{}) *Load {
 	}
 }
 
+func (eb *EngineBay) NewLoadOfType(engineType string, loadData interface{}) *Load {
+	return &Load{
+		EngineType: engineType,
+		EngineLoad: loadData,
+	}
+}
+
 func (eb *EngineBay) MarshalLoad(load *Load) ([]byte, error) {
 	return json.Marshal(load)
 }
