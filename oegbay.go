@@ -58,11 +58,16 @@ func (eb *EngineBay) NewLoad(loadData interface{}) *Load {
 	}
 }
 
-func (eb *EngineBay) NewLoadOfType(engineType string, loadData interface{}) *Load {
+func (eb *EngineBay) NewLoadOfType(engineType string, loadData interface{}) (*Load, error) {
+	engineLoad, err := eb.Engines[engineType].UnmarshalLoad(loadData)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Load{
 		EngineType: engineType,
-		EngineLoad: loadData,
-	}
+		EngineLoad: engineLoad,
+	}, nil
 }
 
 func (eb *EngineBay) MarshalLoad(load *Load) ([]byte, error) {
