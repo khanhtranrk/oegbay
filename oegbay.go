@@ -110,11 +110,11 @@ func (eb *EngineBay) GetPage(load *Load, signiture string) (*Page, error) {
 	return eb.Engines[load.EngineType].GetPage(load.EngineLoad, signiture)
 }
 
-func (eb *EngineBay) CreatePage(load *Load, parentSigniture string, page *Page) error {
+func (eb *EngineBay) CreatePage(load *Load, page *Page) error {
 	return eb.Engines[load.EngineType].CreatePage(load.EngineLoad, page)
 }
 
-func (eb *EngineBay) UpdatePage(load *Load, parentSigniture string, page *Page) error {
+func (eb *EngineBay) UpdatePage(load *Load, page *Page) error {
 	return eb.Engines[load.EngineType].UpdatePage(load.EngineLoad, page)
 }
 
