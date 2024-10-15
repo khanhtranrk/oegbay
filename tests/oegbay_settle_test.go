@@ -37,17 +37,23 @@ func TestCreate(t *testing.T) {
 		Description: "Test Description",
 	}
 
-	load := engineBay.NewLoad(
-		&settle.Load{
-			Path: dir,
+	load, err := engineBay.NewLoadOfType(
+		"settle",
+		map[string]interface{}{
+			"Path": dir,
 		},
 	)
 
-	_load, _ := engineBay.MarshalLoad(load)
+	if err != nil {
+		assert.Fail(t, err.Error())
+		return
+	}
 
-	__load, _ := engineBay.UnmarshalLoad(_load)
+	// _load, _ := engineBay.MarshalLoad(load)
 
-	if err := engineBay.Create(__load, &document); err != nil {
+	// __load, _ := engineBay.UnmarshalLoad(_load)
+
+	if err := engineBay.Create(load, &document); err != nil {
 		assert.Fail(t, err.Error())
 		return
 
