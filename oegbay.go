@@ -24,6 +24,7 @@ type Engine interface {
 	GetPage(load interface{}, signiture string) (*Page, error)
 	CreatePage(load interface{}, page *Page) error
 	UpdatePage(load interface{}, page *Page) error
+	UpdatePageContent(load interface{}, signiture string, content []byte) error
 	DeletePage(load interface{}, signiture string) error
 }
 
@@ -116,6 +117,10 @@ func (eb *EngineBay) CreatePage(load *Load, page *Page) error {
 
 func (eb *EngineBay) UpdatePage(load *Load, page *Page) error {
 	return eb.Engines[load.EngineType].UpdatePage(load.EngineLoad, page)
+}
+
+func (eb *EngineBay) UpdatePageContent(load *Load, signiture string, content []byte) error {
+	return eb.Engines[load.EngineType].UpdatePageContent(load.EngineLoad, signiture, content)
 }
 
 func (eb *EngineBay) DeletePage(load *Load, signiture string) error {
