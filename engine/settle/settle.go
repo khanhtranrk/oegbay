@@ -185,6 +185,35 @@ func (s *Settle) UpdatePage(load interface{}, page *domain.Page) error {
 		return err
 	}
 
+	if err := s.Process.SaveSchema(ld, sch); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Settle) UpdatePageContent(load interface{}, signiture string, content []byte) error {
+	ld, ok := load.(*Load)
+	if !ok {
+		return fmt.Errorf("expected type *Load, got %T", load)
+	}
+
+	sch, err := s.Process.ReadSchema(ld)
+	if err != nil {
+		return err
+	}
+
+	page, err := sch.GetPage(signiture)
+	if err != nil {
+		return err
+	}
+
+	page.Content = string(content)
+
+	if err := sch.UpdatePage(page); err != nil {
+		return err
+	}
+
 	if err := s.Process.UpdatePage(ld, page); err != nil {
 		return err
 	}
